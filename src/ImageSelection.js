@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
-import { Modal, Button, Image } from 'semantic-ui-react';
+import { Modal, Button, Image, Grid } from 'semantic-ui-react';
 import BACKGROUNDS from './backgrounds';
-
 
 export default function ImageSelection({ onChange, value = "sylvester" }) {
 
@@ -21,11 +20,13 @@ export default function ImageSelection({ onChange, value = "sylvester" }) {
 
   const images = () => {
     return Object.keys(BACKGROUNDS).map((background, index) =>
+    <Grid.Column  key={background + index}>
       <Image
         src={BACKGROUNDS[background].small}
         className={`${selectedImage === background ? "selected" : null} background-select`}
         onClick={(e) => handleClick(background)}
-        key={background + index} />)
+       />
+    </Grid.Column>)
   }
 
   return (
@@ -41,9 +42,9 @@ export default function ImageSelection({ onChange, value = "sylvester" }) {
       >
         <Modal.Header>Select a Background for your countdown</Modal.Header>
         <Modal.Content>
-          <Image.Group size='small'>
+          <Grid doubling columns={4}>
             {images()}
-          </Image.Group>
+          </Grid>
         </Modal.Content>
         <Modal.Actions>
           <Button color='black' onClick={() => setOpen(false)} type="button" negative>

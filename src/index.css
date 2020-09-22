@@ -37,16 +37,26 @@ code {
 
 }
 
+.countdown-element-display.ms {
+  font-size: 0.8rem;
+}
+
 
 @media only screen and (min-width: 600px) {
   .countdown-element-display {
     font-size: 2rem;
+  }
+  .countdown-element-display.ms {
+    font-size: 1.2rem;
   }
 }
 
 @media only screen and (min-width: 1200px) {
   .countdown-element-display {
     font-size: 3rem;
+  }
+  .countdown-element-display.ms {
+    font-size: 2rem;
   }
 }
 
@@ -81,5 +91,12 @@ code {
 
 .align-items-center {
   align-items: center
+}
+
+.btn-container-stopwatch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2rem;
 }
 

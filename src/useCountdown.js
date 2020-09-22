@@ -7,11 +7,12 @@ const SEC_PER_MIN = 60;
 const HOURS_PER_DAY = 24;
 const MIN_PER_HOUR = 60;
 
-export const formatSecondsLeft = (secondsLeft, unit =  "days", compact) => {
+export const formatMsLeft = (msLeft, unit =  "days", compact, displayMS = false) => {
 
-  const diffDays = Math.floor(secondsLeft / SEC_PER_DAY);
-  const diffHours = Math.floor(secondsLeft / SEC_PER_HOUR);
-  const diffMin = Math.floor(secondsLeft / SEC_PER_MIN);
+  const diffDays = Math.floor(msLeft / (SEC_PER_DAY * 1000));
+  const diffHours = Math.floor(msLeft / (SEC_PER_HOUR * 1000));
+  const diffMin = Math.floor(msLeft / (SEC_PER_MIN * 1000));
+  const diffSec = Math.floor(msLeft/1000);
 
   switch (unit) {
     case "days":
@@ -19,27 +20,44 @@ export const formatSecondsLeft = (secondsLeft, unit =  "days", compact) => {
         days: (compact && diffDays === 0) ? undefined :  diffDays,
         hours: (compact && diffHours === 0 && diffDays === 0) ? undefined : diffHours % HOURS_PER_DAY,
         minutes: diffMin % MIN_PER_HOUR,
-        seconds: secondsLeft % SEC_PER_MIN
+        seconds: diffSec % SEC_PER_MIN,
+        miliseconds: displayMS ? msLeft % 1000 : undefined
       };
     case "hours":
       return {
         hours: (compact && diffHours === 0) ? undefined : diffHours,
         minutes: diffMin % MIN_PER_HOUR,
-        seconds: secondsLeft % SEC_PER_MIN
+        seconds: diffSec % SEC_PER_MIN,
+        miliseconds: displayMS ? msLeft % 1000 : undefined
       };
     case "minutes":
       return {
         minutes: diffMin,
-        seconds: secondsLeft % SEC_PER_MIN
+        seconds: diffSec % SEC_PER_MIN,
+        miliseconds: displayMS ? msLeft % 1000 : undefined
       };
     case "seconds":
       return {
-        seconds: secondsLeft
+        seconds: diffSec,
+        miliseconds: displayMS ? msLeft % 1000 : undefined
       };
     default:
       return {
-        seconds: secondsLeft
+        seconds: diffSec,
+        miliseconds: displayMS ? msLeft % 1000 : undefined
       };
+  }
+
+}
+
+export const getStringValues = (countdown) => {
+
+  return {
+    days: toString(countdown.days),
+    hours: toString(countdown.hours),
+    minutes: toString(countdown.minutes),
+    seconds: toString(countdown.seconds),
+    miliseconds: msToString(countdown.miliseconds),
   }
 
 }
@@ -48,29 +66,33 @@ export const toString = (value) => {
   return (value < 10) ? `0${value}` : value;
 }
 
-const useCountdown = (initialDate, initFormat, allowCountUp = true ) => {
+export const msToString = (value) => {
+  return (value < 100) ? `0${value}` : (value < 10) ? `00${value}` : value;
+}
+
+const useCountdown = (initialDate, initFormat, allowCountUp = false ) => {
 
 
 
   const [date, setDate] = useState(new Date(initialDate));
   const [format, setFormat] = useState(initFormat);
-  const [secondsLeft, setSecondsLeft] = useState(null);
+  const [msLeft, setMsLeft] = useState(null);
   const timer = useRef();
 
   const {toStrings = true, compact = false, unit = "days"} = format;
 
   useEffect(() => {
 
-    timer.current = setInterval(updateSecondsLeft, 1000);
+    timer.current = setInterval(updateMsLeft, 1000);
     return () => clearInterval(timer.current);
 
   }, [date]);
 
   useEffect(() => {
-    if(secondsLeft !== null && secondsLeft < 1 && !allowCountUp) {
+    if(msLeft !== null && msLeft < 1 && !allowCountUp) {
       clearInterval(timer.current);
     }
-  }, [secondsLeft, allowCountUp]);
+  }, [msLeft, allowCountUp]);
 
   const changeDate = (date) => {
     const newDate = new Date(date);
@@ -81,27 +103,16 @@ const useCountdown = (initialDate, initFormat, allowCountUp = true ) => {
     setFormat({...format, ...params})
   }
 
-  const getStringValues = (countdown) => {
-
-    return {
-      days: toString(countdown.days),
-      hours: toString(countdown.hours),
-      minutes: toString(countdown.minutes),
-      seconds: toString(countdown.seconds),
-    }
-
-  }
-
-  const updateSecondsLeft = () => {
+  const updateMsLeft = () => {
     
     const now = Date.now();
-    let diffSec = Math.floor((date - now) / 1000);
+    let diffSec = date - now;
     diffSec *= (diffSec < 0) ? (-1) : 1;
-    setSecondsLeft(diffSec);
+    setMsLeft(diffSec);
   }
 
   
-  let countdown = formatSecondsLeft(secondsLeft, unit, compact);
+  let countdown = formatMsLeft(msLeft, unit, compact);
   countdown = toStrings ? getStringValues(countdown) : countdown;
 
   return { changeDate, countdown, changeFormat, format };

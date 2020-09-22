@@ -9,6 +9,7 @@ import {
 } from "react-router-dom";
 import Main from './Main';
 import Examples from './Examples';
+import Stopwatch from './Stopwatch';
 
 ReactDOM.render(
   <React.StrictMode>
@@ -21,6 +22,9 @@ ReactDOM.render(
       </Route>
       <Route path="/examples/:example" exact>
         <Examples/>
+      </Route>
+      <Route path="/stopwatch" exact>
+        <Stopwatch/>
       </Route>
     </Router>
   </React.StrictMode>,

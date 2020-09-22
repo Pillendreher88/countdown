@@ -21,22 +21,30 @@ export default function CountdownForm() {
 
   let history = useHistory();
 
-  const initialState = {
+  const initialStateDate = {
     title: "",
     allowCountUp: true,
     date: getTomorrow(),
     hour: 0,
     minute: 0,
     seconds: 0,
-    background: "beach"
+    background: "beach",
+    alert: false,
   };
 
-  const [countdownCustom, setCountdownCustom] = useState(initialState);
+  const [countdownCustom, setCountdownCustom] = useState(initialStateDate);
+  const [type, setType] = useState("date");
 
   const options59 = [];
 
   for (let i = 0; i < 60; i++) {
     options59.push({ text: (i < 10) ? `0${i}` : i, value: i });
+  }
+
+  const options99 = [];
+
+  for (let i = 0; i < 100; i++) {
+    options99.push({ text: (i < 10) ? `0${i}` : i, value: i });
   }
 
   const options23 = [];
@@ -55,15 +63,21 @@ export default function CountdownForm() {
   }
 
   const toggle = (e, param) => {
-    const { checked } = param;
-    setCountdownCustom({ ...countdownCustom, allowCountUp: checked });
+    const { checked, name } = param;
+    setCountdownCustom({ ...countdownCustom, [name]: checked });
   }
 
   const handleSubmit = () => {
-    addCountdown(countdownCustom);
+    if (type === "time") {
+      addStopwatch(countdownCustom)
+    }
+    else {
+      addCountdown(countdownCustom);
+    }
   }
 
   const addCountdown = (countdown) => {
+
     const date = new Date(countdown.date)
     date.setHours(countdown.hour);
     date.setMinutes(countdown.minute);
@@ -72,7 +86,16 @@ export default function CountdownForm() {
     history.push(`/?${query}`);
   }
 
-  const { title, date, allowCountUp, minute, hour, seconds } = countdownCustom;
+  const addStopwatch = (countdown) => {
+
+    const msLeft = countdown.hour * 60 * 60 * 1000 + countdown.minute * 60 * 1000 + countdown.seconds * 1000;
+    const countUp = countdownCustom.allowCountUp ? 1 : 0;
+    const alert = countdownCustom.alert ? 1 : 0;
+    const query = querystring.stringify({ t: msLeft, title: countdown.title || undefined, background: countdown.background, countUp, alert });
+    history.push(`/?${query}`);
+  }
+
+  const { title, date, allowCountUp, minute, hour, seconds, alert } = countdownCustom;
 
   const CustomInput = ({ value, onClick }) => (
     <Form.Input
@@ -86,7 +109,7 @@ export default function CountdownForm() {
       <Grid.Row centered>
         <Grid.Column mobile={16} computer={12} color="black">
           <Form onSubmit={handleSubmit} inverted>
-            <Form.Group widths='equal' inline>
+            <Form.Group >
               <Form.Input
                 placeholder='Enter title'
                 label='Title'
@@ -94,18 +117,44 @@ export default function CountdownForm() {
                 value={title}
                 onChange={handleChange}
               />
-              <Form.Field>
-                <Checkbox
-                  label='Allow count up '
-                  checked={allowCountUp}
-                  onChange={toggle} />
-              </Form.Field>
             </Form.Group>
+            <Form.Group >
+              <label>Type: </label>
+              <Form.Radio
+                label='Specific date'
+                name='type'
+                checked={type === 'date'}
+                onChange={() => setType('date')}
+              />
+              <Form.Radio
+                label='fixed amount of  time'
+                name='type'
+                checked={type === 'time'}
+                onChange={() => setType('time')}
+              />
+            </Form.Group>
+            {type === 'time' &&
+              <>
+                <Form.Field disabled={type === 'date'}>
+                  <Checkbox
+                    name="allowCountUp"
+                    label='Count up after countdown ends '
+                    checked={allowCountUp}
+                    onChange={toggle} />
+                </Form.Field>
+                <Form.Field >
+                  <Checkbox
+                    name="alert"
+                    label='Play alert sound after countdown ends '
+                    checked={alert}
+                    onChange={toggle} />
+                </Form.Field>
+              </>}
             <Grid padded>
               <Grid.Column computer={2} tablet={2} mobile={5}>
                 <Form.Field
                   control={Select}
-                  options={options23}
+                  options={type === 'time' ? options99 : options23}
                   name='hour'
                   value={hour}
                   label="Hour"
@@ -136,22 +185,21 @@ export default function CountdownForm() {
                   onChange={handleChange}
                 />
               </Grid.Column>
-              <Grid.Column mobile={16} tablet={4} computer={4}>
-                <Form.Field>
-                  <label>Pick a date</label>
-                  <DatePicker
-                    name='date'
-                    value={date}
-                    onChange={handleDateChange}
-                    selected={date}
-                    minDate={!allowCountUp ? new Date() : null}
-                    placeholderText="Click to select a date"
-                    customInput={<CustomInput />}
-                  />
-                </Form.Field>
-                <Form.Field>
-                </Form.Field>
-              </Grid.Column>
+              {(type === "date") &&
+                <Grid.Column mobile={16} tablet={4} computer={4}>
+                  <Form.Field>
+                    <label>Pick a date</label>
+                    <DatePicker
+                      name='date'
+                      value={date}
+                      onChange={handleDateChange}
+                      selected={date}
+                      minDate={!allowCountUp ? new Date() : null}
+                      placeholderText="Click to select a date"
+                      customInput={<CustomInput />}
+                    />
+                  </Form.Field>
+                </Grid.Column>}
             </Grid>
             <ImageSelection
               onChange={(background) => setCountdownCustom({ ...countdownCustom, background })}

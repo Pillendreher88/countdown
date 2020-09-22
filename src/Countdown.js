@@ -1,9 +1,9 @@
-import React, { useState } from 'react'
+import React from 'react'
 import useCountdown from './useCountdown';
 import { Dropdown } from 'semantic-ui-react';
 import { Header, Segment, Label, Container } from 'semantic-ui-react';
-import { useMediaQuery } from 'react-responsive';
-import BACKGROUNDS from './backgrounds';
+
+import Display from './Display';
 
 
 const options = [
@@ -23,9 +23,7 @@ export default function Countdown({
   hideTargetDate = false }) {
 
   const { countdown, changeFormat, format } = useCountdown(date, { compact: compactDisplay, unit: initUnit, toString: true });
-  const isMobile = useMediaQuery({ maxWidth: 767 });
-  background = BACKGROUNDS[background] ? BACKGROUNDS[background] : BACKGROUNDS.defaultBg;
-  const backgroundImage = isMobile ? background.small : background.big;
+ 
 
   const dateTarget = new Date(date);
   const now = Date.now();
@@ -37,11 +35,6 @@ export default function Countdown({
 
   const handleChange = (e, { value }) => {
     changeFormat({unit: value});
-  }
-
-  const countdownStyle = {
-    backgroundImage: `url(${backgroundImage})`,
-    backgroundPosition: background.position ? background.position : "center center",
   }
 
   return (
@@ -64,46 +57,7 @@ export default function Countdown({
                 style={{ marginTop: "1rem" }} /> : null}
           </Segment> : null}
       </Container>
-      <div className="countdown-container" style={countdownStyle}>
-        {countdown.days &&
-          <div className="countdown-element">
-            <div className="countdown-element-display" data-testid="countdown-days">
-              {countdown.days}
-            </div>
-            <div className="countdown-element-label">
-              Days
-            </div>
-          </div>
-        }
-        {countdown.hours &&
-          <div className="countdown-element">
-            <div className="countdown-element-display" data-testid="countdown-hours">
-              {countdown.hours}
-            </div>
-            <div className="countdown-element-label">
-              Hours
-            </div>
-          </div>
-        }
-        {countdown.minutes &&
-          <div className="countdown-element">
-            <div className="countdown-element-display" data-testid="countdown-minutes">
-              {countdown.minutes}
-            </div>
-            <div className="countdown-element-label">
-              Minutes
-          </div>
-          </div>}
-        {countdown.seconds &&
-          <div className="countdown-element">
-            <div className="countdown-element-display" data-testid="countdown-seconds">
-              {countdown.seconds}
-            </div>
-            <div className="countdown-element-label">
-              Seconds
-          </div>
-          </div>}
-      </div>
+      <Display background = {background} time = {countdown}/>
     </>
   )
 }

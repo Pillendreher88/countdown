@@ -21,7 +21,7 @@ export default function CountdownForm() {
 
   let history = useHistory();
 
-  const initialStateDate = {
+  const initialState = {
     title: "",
     allowCountUp: true,
     date: getTomorrow(),
@@ -29,10 +29,10 @@ export default function CountdownForm() {
     minute: 0,
     seconds: 0,
     background: "beach",
-    alert: false,
+    onEnd: "countUp",
   };
 
-  const [countdownCustom, setCountdownCustom] = useState(initialStateDate);
+  const [countdownCustom, setCountdownCustom] = useState(initialState);
   const [type, setType] = useState("date");
 
   const options59 = [];
@@ -64,6 +64,7 @@ export default function CountdownForm() {
 
   const toggle = (e, param) => {
     const { checked, name } = param;
+    console.log(param);
     setCountdownCustom({ ...countdownCustom, [name]: checked });
   }
 
@@ -89,13 +90,13 @@ export default function CountdownForm() {
   const addStopwatch = (countdown) => {
 
     const msLeft = countdown.hour * 60 * 60 * 1000 + countdown.minute * 60 * 1000 + countdown.seconds * 1000;
-    const countUp = countdownCustom.allowCountUp ? 1 : 0;
-    const alert = countdownCustom.alert ? 1 : 0;
+    const countUp = (countdownCustom.onEnd === "countUp") ? 1 : 0;
+    const alert = (countdownCustom.onEnd === "alert") ? 1 : 0;
     const query = querystring.stringify({ t: msLeft, title: countdown.title || undefined, background: countdown.background, countUp, alert });
     history.push(`/?${query}`);
   }
 
-  const { title, date, allowCountUp, minute, hour, seconds, alert } = countdownCustom;
+  const { title, date, allowCountUp, minute, hour, seconds, onEnd } = countdownCustom;
 
   const CustomInput = ({ value, onClick }) => (
     <Form.Input
@@ -109,45 +110,57 @@ export default function CountdownForm() {
       <Grid.Row centered>
         <Grid.Column mobile={16} computer={12} color="black">
           <Form onSubmit={handleSubmit} inverted>
-            <Form.Group >
-              <Form.Input
-                placeholder='Enter title'
-                label='Title'
-                name='title'
-                value={title}
-                onChange={handleChange}
-              />
-            </Form.Group>
-            <Form.Group >
+            <Form.Input
+              placeholder='Enter title'
+              label='Title'
+              name='title'
+              value={title}
+              onChange={handleChange}
+              width={8}
+            />
+            <Form.Field >
               <label>Type: </label>
-              <Form.Radio
-                label='Specific date'
-                name='type'
-                checked={type === 'date'}
-                onChange={() => setType('date')}
-              />
-              <Form.Radio
-                label='fixed amount of  time'
-                name='type'
-                checked={type === 'time'}
-                onChange={() => setType('time')}
-              />
-            </Form.Group>
+            </Form.Field>
+            <Form.Radio
+              label='Specific date'
+              name='type'
+              checked={type === 'date'}
+              onChange={() => setType('date')}
+            />
+            <Form.Radio
+              label='fixed amount of  time'
+              name='type'
+              checked={type === 'time'}
+              onChange={() => setType('time')}
+            />
             {type === 'time' &&
               <>
+                <Form.Field >
+                  <label>After Countdown ends: </label>
+                </Form.Field>
                 <Form.Field disabled={type === 'date'}>
-                  <Checkbox
-                    name="allowCountUp"
-                    label='Count up after countdown ends '
-                    checked={allowCountUp}
-                    onChange={toggle} />
+                  <Form.Radio
+                    name="onEnd"
+                    value="countUp"
+                    label='Count up '
+                    checked={onEnd === "countUp"}
+                    onChange={handleChange} />
                 </Form.Field>
                 <Form.Field >
-                  <Checkbox
-                    name="alert"
-                    label='Play alert sound after countdown ends '
-                    checked={alert}
-                    onChange={toggle} />
+                  <Form.Radio
+                    name="onEnd"
+                    value="alert"
+                    label='Stop and play alert sound '
+                    checked={onEnd === "alert"}
+                    onChange={handleChange} />
+                </Form.Field>
+                <Form.Field >
+                  <Form.Radio
+                    name="onEnd"
+                    value="stop"
+                    label='Stop without sound '
+                    checked={onEnd === "stop"}
+                    onChange={handleChange} />
                 </Form.Field>
               </>}
             <Grid padded>

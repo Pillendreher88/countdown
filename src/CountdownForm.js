@@ -2,13 +2,11 @@ import React, { useState } from 'react';
 import 'semantic-ui-css/semantic.min.css';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { Dropdown, Form, Checkbox } from 'semantic-ui-react'
+import { Dropdown, Form } from 'semantic-ui-react'
 import { Grid } from 'semantic-ui-react'
 import { useHistory } from 'react-router-dom';
 import ImageSelection from './ImageSelection.js';
 import querystring from 'query-string';
-
-
 
 const getTomorrow = () => {
   const today = new Date();
@@ -60,12 +58,6 @@ export default function CountdownForm() {
   const handleChange = (e, param) => {
     const { name, value } = param;
     setCountdownCustom({ ...countdownCustom, [name]: value });
-  }
-
-  const toggle = (e, param) => {
-    const { checked, name } = param;
-    console.log(param);
-    setCountdownCustom({ ...countdownCustom, [name]: checked });
   }
 
   const handleSubmit = () => {
